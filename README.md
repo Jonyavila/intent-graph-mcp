@@ -5,25 +5,33 @@
 </p>
 
 <p align="center">
-  An open-source MCP server that helps AI agents understand your codebase architecture before generating code.
+  An open-source MCP server that gives AI agents architectural awareness, deterministic scaffolding and project-specific coding rules.
 </p>
 
 ---
 
-**Architecture Copilot MCP** es un servidor basado en **Model Context Protocol (MCP)** que analiza la arquitectura de tus proyectos mediante `tree-sitter` y `networkx`.
+**Architecture Copilot MCP** es una herramienta basada en **Model Context Protocol (MCP)** que permite a los agentes de IA comprender, consultar y respetar la arquitectura de un proyecto antes de generar código.
 
-Construye un grafo de dependencias a partir del código existente y permite que asistentes de IA como GitHub Copilot y Cline comprendan la estructura del proyecto antes de generar nuevos módulos.
+Utiliza `tree-sitter` y `networkx` para analizar el código fuente, construir un grafo de dependencias y extraer patrones arquitectónicos existentes.
 
-El objetivo es que la IA no escriba código de forma aislada, sino que respete los patrones, convenciones y decisiones arquitectónicas existentes.
+A diferencia de los asistentes tradicionales que generan código basándose únicamente en instrucciones, Architecture Copilot incorpora una capa de contexto estructural que permite trabajar sobre las convenciones reales del proyecto.
+
+Incluye tres capacidades fundamentales:
+
+- **Architecture Intelligence:** comprensión de la estructura y los patrones existentes.
+- **Deterministic Scaffolding:** creación física de carpetas y archivos siguiendo estructuras detectadas.
+- **Architecture Guardrails:** reglas que orientan la generación de código y ayudan a mantener la consistencia arquitectónica.
 
 ## ✨ Características principales
 
 - 🌐 **Análisis multi-lenguaje:** soporte para Python, JavaScript, TypeScript y TSX (React / Next.js).
 - 🏗️ **Grafo arquitectónico:** representa las relaciones y dependencias entre módulos del proyecto.
 - 🧹 **Filtrado inteligente:** ignora automáticamente directorios innecesarios como `node_modules`, `.next`, `.venv` y `dist`.
-- 🤖 **Integración MCP:** expone herramientas para que los agentes de IA consulten la arquitectura existente.
-- 🧩 **Generación contextual:** sugiere estructuras de archivos y módulos basándose en patrones detectados.
-- ⚡ **Análisis local:** procesa la arquitectura del proyecto localmente, sin depender de un servicio externo para el análisis.
+- 🤖 **Integración MCP:** permite que agentes como GitHub Copilot y Cline consulten la arquitectura mediante herramientas especializadas.
+- 🧱 **Andamiaje determinista (`scaffold_module`):** crea físicamente carpetas y archivos basándose en estructuras existentes.
+- 🚨 **Reglas arquitectónicas (`rules.json`):** permite definir convenciones y restricciones de diseño, como Clean Architecture.
+- 🧠 **Contexto de generación (`get_generation_context`):** proporciona reglas y ejemplos del proyecto para orientar la generación de código.
+- ⚡ **Procesamiento local:** analiza el código y construye el grafo localmente, sin depender de servicios externos para estas operaciones.
 
 ---
 
@@ -49,11 +57,7 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 
 Necesario únicamente si quieres utilizar el **MCP Inspector**, una interfaz visual para probar las herramientas del servidor.
 
-Descárgalo desde [nodejs.org](https://nodejs.org/) o instálalo mediante:
-
-```powershell
-winget install OpenJS.NodeJS
-```
+Descárgalo desde [nodejs.org](https://nodejs.org/).
 
 ---
 
@@ -61,7 +65,7 @@ winget install OpenJS.NodeJS
 
 ### Instalación global como herramienta de consola
 
-La forma más rápida de utilizar Architecture Copilot MCP es instalarlo globalmente mediante `uv`.
+La forma más rápida de utilizar Architecture Copilot MCP es instalar globalmente el comando de análisis mediante `uv`.
 
 ```bash
 uv tool install git+https://github.com/Jonyavila/intent-graph-mcp.git
@@ -81,13 +85,25 @@ intent-graph "C:\Ruta\A\Tu\Proyecto"
 intent-graph "./ruta-a-tu-proyecto"
 ```
 
-El análisis generará el archivo `grafo_proyecto.graphml` en la ubicación configurada por la herramienta.
+### 📁 Ubicación del grafo arquitectónico
+
+El análisis genera el archivo:
+
+```text
+grafo_proyecto.graphml
+```
+
+El archivo se almacena en el directorio de instalación de la herramienta, gestionado por `uv`, y no dentro de la carpeta del proyecto analizado.
+
+Esto permite que el servidor MCP encuentre el grafo desde su propia ubicación.
+
+> **Importante:** actualmente se utiliza un único grafo compartido. Cada nuevo análisis sobrescribe el anterior. Si trabajas con varios proyectos, debes volver a ejecutar `intent-graph` apuntando al proyecto que deseas analizar antes de utilizar la IA.
 
 ---
 
 ## 📦 Instalación para desarrollo
 
-Si quieres modificar el código fuente o contribuir al proyecto, puedes instalarlo localmente.
+Si quieres modificar el código fuente o contribuir al proyecto:
 
 ### 1. Clonar el repositorio
 
@@ -119,32 +135,19 @@ uv run python build_graph.py "C:\Ruta\A\Tu\Proyecto"
 uv run python build_graph.py "./ruta-a-tu-proyecto"
 ```
 
----
-
-## 🧪 Probar el servidor MCP
-
-Puedes verificar el funcionamiento del servidor mediante el **MCP Inspector**.
-
-Ejecuta:
-
-```bash
-npx @modelcontextprotocol/inspector uv run python server.py
-```
-
-Se abrirá una interfaz web desde la que podrás:
-
-1. Conectar con el servidor MCP.
-2. Acceder a la sección **Tools**.
-3. Consultar las herramientas disponibles.
-4. Ejecutar `suggest_skeleton` utilizando intenciones como `layout`, `users` o `components`.
-
-Esto permite comprobar las respuestas del servidor antes de integrarlo con un asistente de IA.
+En esta modalidad, el grafo se genera en el directorio del repositorio clonado.
 
 ---
 
 ## 💻 Integración con VS Code
 
-Architecture Copilot MCP puede integrarse con asistentes compatibles con MCP, como **GitHub Copilot** y **Cline**.
+### Inicio automático del servidor MCP
+
+Architecture Copilot MCP utiliza el transporte `stdio` para comunicarse con los asistentes de IA.
+
+**No necesitas iniciar el servidor manualmente.**
+
+VS Code se encarga de ejecutar `server.py` automáticamente en segundo plano cuando detecta la configuración MCP y se inicia el servidor desde el entorno correspondiente.
 
 Crea o modifica el archivo:
 
@@ -152,7 +155,7 @@ Crea o modifica el archivo:
 .vscode/mcp.json
 ```
 
-Añade la siguiente configuración:
+Ubícalo en la raíz de tu proyecto y añade:
 
 ```json
 {
@@ -172,36 +175,126 @@ Añade la siguiente configuración:
 }
 ```
 
-> **Importante:** reemplaza las rutas de ejemplo por la ubicación real del repositorio en tu equipo. En Windows utiliza barras invertidas dobles (`\\`) dentro del JSON.
+> **Importante:** reemplaza las rutas de ejemplo por la ubicación real donde clonaste el repositorio. En Windows utiliza barras invertidas dobles (`\\`) dentro del JSON.
+
+### 🔄 Flujo de funcionamiento
+
+1. Ejecutas `intent-graph` para analizar tu proyecto.
+2. Se genera o actualiza `grafo_proyecto.graphml`.
+3. Abres VS Code con la configuración MCP correspondiente.
+4. VS Code inicia `server.py` automáticamente.
+5. GitHub Copilot o Cline pueden utilizar las herramientas disponibles.
+
+**Consideración:** el servidor lee el grafo almacenado en la carpeta del repositorio clonado. Por eso, el grafo generado mediante la instalación global y el utilizado por el servidor deben estar sincronizados. Actualmente, el último análisis reemplaza al anterior.
 
 ---
 
-## 🎯 Cómo utilizarlo con IA
+## 📜 Configuración de reglas arquitectónicas
 
-Una vez conectado el servidor MCP:
+Architecture Copilot permite definir convenciones mediante un archivo `rules.json`.
 
-1. Abre tu proyecto en VS Code.
-2. Inicia GitHub Copilot o Cline en modo **Agent**.
-3. Solicita al agente que consulte la arquitectura antes de crear nuevos módulos.
+Puedes utilizarlo para establecer patrones de diseño y restricciones que el agente debe tener en cuenta durante la generación de código.
 
-**Ejemplo de instrucción:**
+Crea el archivo en la ubicación que utiliza el servidor:
 
 ```text
-Utiliza la herramienta suggest_skeleton con la intención
-"layout" y crea los archivos correspondientes en una
-carpeta llamada "nuevo_componente".
-
-Respeta los patrones arquitectónicos y las convenciones
-detectadas en el proyecto existente.
+rules.json
 ```
 
-### 🔄 ¿Qué sucede internamente?
+Ejemplo:
 
-1. El agente de IA invoca la herramienta `suggest_skeleton`.
-2. El servidor consulta el grafo arquitectónico del proyecto.
-3. El algoritmo identifica módulos similares y patrones existentes.
-4. Se determina la estructura recomendada y las extensiones de archivo.
-5. La IA utiliza esa información para generar nuevo código siguiendo la arquitectura existente.
+```json
+{
+  "patron": "Clean Architecture",
+  "reglas": [
+    "Los controladores NO pueden importar modelos de base de datos directamente.",
+    "Los nombres de los archivos deben utilizar kebab-case.",
+    "Todas las funciones asíncronas deben manejar sus propios errores."
+  ]
+}
+```
+
+Las reglas se incorporan al contexto de generación para orientar al agente de IA.
+
+> Si no configuras `rules.json`, puedes seguir utilizando las herramientas de análisis y generación contextual con los patrones detectados en el grafo.
+
+---
+
+## 🎯 Ejemplos de uso con IA
+
+Abre GitHub Copilot en modo **Agent** y utiliza los siguientes ejemplos para interactuar con el servidor.
+
+### 1. 🧱 Andamiaje físico
+
+**Herramienta:** `scaffold_module`
+
+Crea primero la estructura física del módulo y después permite que la IA implemente su lógica.
+
+**Prompt:**
+
+```text
+Utiliza scaffold_module con el intent "login-form"
+y la ruta "D:\Ruta\A\Tu\Proyecto".
+
+Crea físicamente las carpetas y archivos correspondientes.
+Después, implementa la lógica dentro de los archivos creados,
+respetando las reglas arquitectónicas del proyecto.
+```
+
+**Resultado esperado:** el servidor crea las carpetas y archivos correspondientes. La IA trabaja sobre esa estructura en lugar de inventar rutas.
+
+### 2. 🚨 Generación con reglas arquitectónicas
+
+**Herramienta:** `get_generation_context`
+
+Obtiene el contexto de generación, incluyendo las reglas y los ejemplos disponibles.
+
+**Prompt:**
+
+```text
+Utiliza get_generation_context para "payments".
+
+Analiza el manual de estilo, las reglas arquitectónicas
+y los ejemplos existentes.
+
+Después, implementa el módulo de pagos respetando
+las convenciones y la arquitectura del proyecto.
+```
+
+**Resultado esperado:** el agente recibe contexto arquitectónico para generar código coherente con las convenciones existentes.
+
+### 3. 🔍 Exploración de módulos existentes
+
+**Herramientas:** `search_similar_modules` y `get_module_template`
+
+Permite consultar cómo están construidos los módulos antes de modificarlos o crear otros similares.
+
+**Prompt:**
+
+```text
+Utiliza search_similar_modules para buscar "header".
+
+Después, utiliza get_module_template para consultar
+su estructura, funciones y archivos.
+
+Explícame cómo está organizado y qué patrones
+debería respetar al crear un componente similar.
+```
+
+**Resultado esperado:** el agente obtiene una referencia estructural de los módulos existentes.
+
+---
+
+## 🔄 ¿Qué sucede internamente?
+
+Architecture Copilot MCP incorpora un flujo de trabajo que conecta el análisis del código con la generación asistida por IA.
+
+1. **Análisis:** `tree-sitter` analiza los archivos y extrae información estructural.
+2. **Representación:** `networkx` construye el grafo de dependencias.
+3. **Consulta:** el agente utiliza las herramientas MCP para explorar módulos y patrones.
+4. **Contextualización:** `get_generation_context` proporciona reglas y ejemplos.
+5. **Andamiaje:** `scaffold_module` crea físicamente la estructura solicitada.
+6. **Generación:** el agente implementa el código utilizando el contexto arquitectónico disponible.
 
 ---
 
@@ -209,17 +302,11 @@ detectadas en el proyecto existente.
 
 | Herramienta | Descripción |
 |:---|:---|
-| `search_similar_modules` | Busca módulos similares dentro del grafo según una intención determinada. |
+| `search_similar_modules` | Busca módulos similares dentro del grafo según una intención. |
 | `get_module_template` | Obtiene la estructura detallada de un módulo, incluyendo clases, funciones y archivos. |
-| `suggest_skeleton` | Combina las herramientas anteriores para recomendar la estructura de un nuevo módulo. |
-
-### ⭐ Herramienta principal: `suggest_skeleton`
-
-Es el punto central del proyecto.
-
-Permite que un agente de IA obtenga contexto arquitectónico antes de generar nuevos componentes o funcionalidades.
-
-En lugar de proponer una estructura genérica, utiliza los patrones encontrados en el proyecto como referencia.
+| `suggest_skeleton` | Recomienda la estructura de un nuevo módulo a partir de patrones existentes. |
+| `get_generation_context` | Devuelve el contexto de generación, incluyendo reglas y ejemplos del proyecto. |
+| `scaffold_module` | Crea físicamente carpetas y archivos basándose en el grafo arquitectónico. |
 
 ---
 
@@ -227,7 +314,7 @@ En lugar de proponer una estructura genérica, utiliza los patrones encontrados 
 
 | Tecnología | Función |
 |:---|:---|
-| **Python** | Motor de análisis. |
+| **Python** | Motor de análisis y lógica del servidor. |
 | **Tree-sitter** | Análisis sintáctico del código fuente. |
 | **NetworkX** | Construcción y gestión del grafo de dependencias. |
 | **MCP** | Comunicación entre el servidor y los agentes de IA. |
@@ -240,7 +327,9 @@ En lugar de proponer una estructura genérica, utiliza los patrones encontrados 
 
 Architecture Copilot MCP busca mejorar la forma en que los agentes de IA interactúan con bases de código existentes.
 
-La idea es incorporar una capa de contexto arquitectónico que permita generar código más coherente, mantener las convenciones del proyecto y reducir inconsistencias estructurales.
+Su propósito es incorporar una capa de inteligencia arquitectónica que permita generar código más coherente, respetar las convenciones del proyecto y reducir inconsistencias estructurales.
+
+No se trata solamente de sugerir código: se trata de proporcionar a la IA una comprensión más profunda de cómo está construido el software y cómo debería evolucionar.
 
 > **La IA no debería limitarse a escribir código. También debería comprender cómo está construido el proyecto.**
 

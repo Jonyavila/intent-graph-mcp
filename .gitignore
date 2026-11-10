@@ -1,15 +1,30 @@
+# Entornos y caché de Python
 .venv/
 __pycache__/
-*.graphml
-.vscode/
-nuevo_modulo/
-mi-proyecto-ejemplo/
+*.pyc
 .python-version
-.venv/
-__pycache__/
+
+# Archivos de compilación (¡Muy importante por el uv tool install!)
+build/
+dist/
+*.egg-info/
+*.whl
+
+# Archivos generados por tu herramienta
 *.graphml
-.vscode/
+grafo_proyecto.graphml
+
+# Configuración local (mejor que cada usuario cree la suya)
+rules.json
+
+# Carpetas de prueba
+mi-proyecto-ejemplo/
+nuevo_modulo/
+nuevo_componente/
+
+# Node.js (por si acaso)
 node_modules/
 .next/
-mi-proyecto-ejemplo/
-.python-version
+
+# Configuración del editor
+.vscode/
