@@ -52,12 +52,24 @@ def suggest_skeleton(intent: str) -> str:
         return f"No se encontraron módulos similares a '{intent}'."
     
     lines = [f"# Esqueleto propuesto para: {intent}", ""]
+    lines.append("## Módulos de referencia detectados en el proyecto:")
+    
+    # Detectar qué lenguaje se está usando según el primer resultado
+    first_file = similar[0]["file"]
+    ext = Path(first_file).suffix if first_file else ".txt"
+    
     for s in similar[:3]:
         t = get_module_template(s["module"])
-        lines.append(f"### {t['module']} ({t['file']})")
+        lines.append(f"\n### {t['module']} ({t['file']})")
         if t["classes"]: lines.append(f"  - Clases: {', '.join(t['classes'])}")
+        if t["functions"]: lines.append(f"  - Funciones: {', '.join(t['functions'])}")
+        if t["related_files"]: lines.append(f"  - Archivos relacionados: {', '.join(t['related_files'])}")
     
-    lines.append("\n## Estructura sugerida:\n```\nnuevo_modulo/\n├── __init__.py\n├── models.py\n└── service.py\n```")
+    # La IA leerá esto y sabrá qué extensión usar
+    lines.append(f"\n## Estructura sugerida:")
+    lines.append("Basado en el patrón detectado, crea los archivos necesarios siguiendo esta estructura.")
+    lines.append(f"Extensión de archivo recomendada para este proyecto: {ext}")
+    
     return "\n".join(lines)
 
 if __name__ == "__main__":

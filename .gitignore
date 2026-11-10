@@ -5,3 +5,11 @@ __pycache__/
 nuevo_modulo/
 mi-proyecto-ejemplo/
 .python-version
+.venv/
+__pycache__/
+*.graphml
+.vscode/
+node_modules/
+.next/
+mi-proyecto-ejemplo/
+.python-version
