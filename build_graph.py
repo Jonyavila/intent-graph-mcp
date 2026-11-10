@@ -101,6 +101,14 @@ def main(repo_path_str: str) -> None:
     print(f"   📊 Nodos: {G.number_of_nodes()} | Aristas: {G.number_of_edges()}")
     print(f"   📂 Archivos analizados: {len(files)}")
 
+import argparse
+
+def cli():
+    parser = argparse.ArgumentParser(description="Genera el grafo arquitectónico de un proyecto.")
+    parser.add_argument("path", nargs="?", default="./mi-proyecto-ejemplo", help="Ruta al proyecto a analizar (por defecto: ./mi-proyecto-ejemplo)")
+    args = parser.parse_args()
+    
+    main(args.path)
+
 if __name__ == "__main__":
-    target = sys.argv[1] if len(sys.argv) > 1 else "./mi-proyecto-ejemplo"
-    main(target)
+    cli()

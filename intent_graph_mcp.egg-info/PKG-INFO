@@ -1,0 +1,238 @@
+Metadata-Version: 2.4
+Name: intent-graph-mcp
+Version: 0.1.0
+Summary: Servidor MCP y CLI para predicción arquitectónica de software basada en grafos.
+Author-email: Jonathan <bravojony484@gmail.com>
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: fastmcp>=4.1.6
+Requires-Dist: mcp[cli]>=2.3.0
+Requires-Dist: networkx>=3.4.2
+Requires-Dist: tree-sitter>=0.26.1
+Requires-Dist: tree-sitter-javascript>=0.25.0
+Requires-Dist: tree-sitter-python>=0.25.0
+Requires-Dist: tree-sitter-typescript>=0.23.2
+Dynamic: license-file
+
+# 🧠 Architecture Copilot MCP
+
+**Understand your architecture. Build smarter with AI.**
+
+Un servidor **MCP (Model Context Protocol)** open source que analiza la arquitectura de tus proyectos mediante `tree-sitter` y `networkx`.
+
+Construye un grafo de dependencias a partir del código existente y permite que asistentes de IA como **GitHub Copilot** y **Cline** comprendan la estructura del proyecto antes de generar nuevos módulos.
+
+El objetivo es que la IA no escriba código de forma aislada, sino que respete los patrones, convenciones y decisiones arquitectónicas existentes.
+
+---
+
+## ✨ Características principales
+
+- **🌐 Análisis multi-lenguaje:** soporte para Python, JavaScript, TypeScript y TSX (React / Next.js).
+- **🏗️ Grafo arquitectónico:** representa las relaciones y dependencias entre módulos del proyecto.
+- **🧹 Filtrado inteligente:** ignora automáticamente directorios innecesarios como `node_modules`, `.next`, `.venv` y `dist`.
+- **🤖 Integración MCP:** expone herramientas para que los agentes de IA consulten la arquitectura existente.
+- **🧩 Generación contextual:** sugiere estructuras de archivos y módulos basándose en patrones detectados en el código.
+- **⚡ Análisis local:** procesa la arquitectura del proyecto sin necesidad de enviar el código a un servicio externo.
+
+---
+
+## 🛠️ Requisitos previos
+
+Antes de comenzar, asegúrate de tener instaladas las siguientes herramientas.
+
+### 1. Python y uv
+
+Se utiliza [uv](https://docs.astral.sh/uv/) como gestor de dependencias y entornos de Python.
+
+**Windows (PowerShell)**
+
+```powershell
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+```
+
+**macOS / Linux**
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+### 2. Node.js (opcional)
+
+Necesario únicamente si quieres utilizar el **MCP Inspector**, una interfaz visual para probar las herramientas del servidor.
+
+Descarga Node.js desde [nodejs.org](https://nodejs.org/) o instálalo mediante:
+
+```powershell
+winget install OpenJS.NodeJS
+```
+
+---
+
+## 📦 Instalación
+
+### 1. Clonar el repositorio
+
+```bash
+git clone https://github.com/TU-USUARIO/intent-graph-mcp.git
+
+cd intent-graph-mcp
+```
+
+### 2. Instalar las dependencias
+
+```bash
+uv sync
+```
+
+### 3. Construir el grafo arquitectónico
+
+Ejecuta el motor de análisis indicando la ruta del proyecto que quieres inspeccionar.
+
+**Windows**
+
+```powershell
+uv run python build_graph.py "C:\Ruta\A\Tu\Proyecto"
+```
+
+**macOS / Linux**
+
+```bash
+uv run python build_graph.py "./ruta-a-tu-proyecto"
+```
+
+Una vez finalizado el análisis, se generará el archivo:
+
+```text
+grafo_proyecto.graphml
+```
+
+Este archivo contiene el grafo arquitectónico del proyecto analizado.
+
+---
+
+## 🧪 Probar el servidor MCP
+
+Puedes verificar el funcionamiento del servidor mediante el **MCP Inspector**.
+
+Ejecuta:
+
+```bash
+npx @modelcontextprotocol/inspector uv run python server.py
+```
+
+Se abrirá una interfaz web desde la que podrás:
+
+1. Conectar con el servidor MCP.
+2. Acceder a la sección **Tools**.
+3. Consultar las herramientas disponibles.
+4. Ejecutar `suggest_skeleton` utilizando intenciones como `layout`, `users` o `components`.
+
+Esto permite comprobar las respuestas del servidor antes de integrarlo con un asistente de IA.
+
+---
+
+## 💻 Integración con VS Code
+
+El servidor puede integrarse con asistentes compatibles con MCP, como **GitHub Copilot** y **Cline**.
+
+Crea o modifica el archivo:
+
+```text
+.vscode/mcp.json
+```
+
+Añade la siguiente configuración:
+
+```json
+{
+  "servers": {
+    "architecture-copilot": {
+      "type": "stdio",
+      "command": "uv",
+      "args": [
+        "run",
+        "--project",
+        "C:/Users/PC/intent-graph-mcp",
+        "python",
+        "C:/Users/PC/intent-graph-mcp/server.py"
+      ]
+    }
+  }
+}
+```
+
+> **Importante:** reemplaza las rutas de ejemplo por la ubicación real del repositorio en tu equipo. Se recomienda utilizar rutas absolutas.
+
+---
+
+## 🎯 Cómo utilizarlo con IA
+
+Una vez conectado el servidor MCP:
+
+1. Abre tu proyecto en VS Code.
+2. Inicia GitHub Copilot o Cline en modo **Agent**.
+3. Solicita al agente que consulte la arquitectura antes de crear nuevos módulos.
+
+**Ejemplo de instrucción:**
+
+```text
+Utiliza la herramienta suggest_skeleton con la intención
+"layout" y crea los archivos correspondientes en una
+carpeta llamada "nuevo_componente".
+
+Respeta los patrones arquitectónicos y las convenciones
+detectadas en el proyecto existente.
+```
+
+### 🔄 ¿Qué sucede internamente?
+
+1. El agente de IA invoca la herramienta `suggest_skeleton`.
+2. El servidor consulta el grafo arquitectónico del proyecto.
+3. El algoritmo identifica módulos similares y patrones existentes.
+4. Se determina la estructura recomendada y las extensiones de archivo.
+5. La IA utiliza esa información para generar el nuevo código siguiendo la arquitectura existente.
+
+---
+
+## 🧰 Herramientas MCP disponibles
+
+| Herramienta | Descripción |
+|---|---|
+| `search_similar_modules` | Busca módulos similares dentro del grafo según una intención determinada. |
+| `get_module_template` | Obtiene la estructura detallada de un módulo, incluyendo clases, funciones y archivos. |
+| `suggest_skeleton` | Combina las herramientas anteriores para recomendar la estructura de un nuevo módulo. |
+
+### ⭐ Herramienta principal: `suggest_skeleton`
+
+Es el punto central del proyecto. Permite que un agente de IA obtenga contexto arquitectónico antes de generar nuevos componentes o funcionalidades.
+
+En lugar de proponer una estructura genérica, utiliza los patrones encontrados en el proyecto como referencia.
+
+---
+
+## 🧱 Tecnologías utilizadas
+
+- **Python** — Motor de análisis.
+- **Tree-sitter** — Análisis sintáctico del código fuente.
+- **NetworkX** — Construcción y gestión del grafo de dependencias.
+- **MCP** — Comunicación entre el servidor y los agentes de IA.
+- **uv** — Gestión de dependencias y ejecución del proyecto.
+- **GraphML** — Formato de almacenamiento del grafo arquitectónico.
+
+---
+
+## 🚀 Objetivo del proyecto
+
+Architecture Copilot MCP busca mejorar la forma en que los agentes de IA interactúan con bases de código existentes.
+
+La idea es incorporar una capa de contexto arquitectónico que permita generar código más coherente, mantener las convenciones del proyecto y reducir inconsistencias estructurales.
+
+**La IA no debería limitarse a escribir código. También debería comprender cómo está construido el proyecto.**
+
+---
+
+## 📄 Licencia
+
+Este proyecto es open source. Consulta el archivo `LICENSE` para conocer los términos de uso y distribución.

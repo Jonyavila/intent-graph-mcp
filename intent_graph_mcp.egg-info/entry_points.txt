@@ -1,0 +1,2 @@
+[console_scripts]
+intent-graph = build_graph:cli
