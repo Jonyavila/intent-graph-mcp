@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+*.graphml
+.vscode/
+nuevo_modulo/
+mi-proyecto-ejemplo/
+.python-version

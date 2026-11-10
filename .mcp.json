@@ -1,0 +1,15 @@
+{
+	"mcpServers": {
+		"architecture-copilot": {
+			"type": "stdio",
+			"command": "uv",
+			"args": [
+				"run",
+				"--project",
+				"C:\\Users\\PC\\intent-graph-mcp",
+				"python",
+				"C:\\Users\\PC\\intent-graph-mcp\\server.py"
+			]
+		}
+	}
+}
